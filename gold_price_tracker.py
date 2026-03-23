@@ -8,23 +8,20 @@ def get_gold_price():
     import requests
     from bs4 import BeautifulSoup
 
-    headers = {"User-Agent": "Mozilla/5.0"}
-
     try:
-        url = "https://www.goodreturns.in/gold-rates/"
-        response = requests.get(url, headers=headers, timeout=10)
+        url = "https://www.bankbazaar.com/gold-rate.html"
+        headers = {"User-Agent": "Mozilla/5.0"}
 
+        response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # Get all text and search manually
-        text = soup.get_text()
+        # Find table values
+        rows = soup.find_all("td")
 
-        # Find price using keyword
-        import re
-        match = re.search(r"₹\s?\d{4,6}", text)
-
-        if match:
-            return match.group()
+        for row in rows:
+            text = row.get_text(strip=True)
+            if "₹" in text and len(text) < 15:
+                return text
 
     except Exception as e:
         print("Error:", e)
