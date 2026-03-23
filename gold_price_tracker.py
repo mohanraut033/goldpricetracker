@@ -14,32 +14,20 @@ def get_gold_price():
 
             page.goto("https://www.goodreturns.in/gold-rates/", timeout=60000)
 
-            # Wait for table to load
-            page.wait_for_selector("table")
+            # Wait for element to be visible
+            page.wait_for_selector("#22K-price", timeout=10000)
 
-            # Extract full table text
-            table_text = page.locator("table").first.inner_text()
+            # Extract price using locator
+            price = page.locator("#22K-price").inner_text()
 
             browser.close()
 
-            # Now extract correct price (10g 24K gold)
-            import re
-
-            # Look for realistic gold range
-            matches = re.findall(r"₹\s?\d{5,6}", table_text)
-
-            for price in matches:
-                value = int(price.replace("₹", "").replace(",", "").strip())
-
-                # Filter realistic gold price range
-                if 50000 < value < 100000:
-                    return f"₹ {value}"
+            return price.strip()
 
     except Exception as e:
         print("Error:", e)
 
     return "Not Found"
-
 
 # ================= TELEGRAM ALERT =================
 def send_telegram(message):
