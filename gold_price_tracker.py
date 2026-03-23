@@ -6,25 +6,34 @@ from playwright.sync_api import sync_playwright
 # ================= FETCH GOLD PRICE =================
 def get_gold_price():
     try:
+        from playwright.sync_api import sync_playwright
+
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
 
             page.goto("https://www.goodreturns.in/gold-rates/", timeout=60000)
 
-            # Wait for page to load
-            page.wait_for_timeout(5000)
+            # Wait for table to load
+            page.wait_for_selector("table")
 
-            content = page.content()
-
-            # Extract price using simple logic
-            import re
-            match = re.search(r"₹\s?\d{4,6}", content)
+            # Extract full table text
+            table_text = page.locator("table").first.inner_text()
 
             browser.close()
 
-            if match:
-                return match.group()
+            # Now extract correct price (10g 24K gold)
+            import re
+
+            # Look for realistic gold range
+            matches = re.findall(r"₹\s?\d{5,6}", table_text)
+
+            for price in matches:
+                value = int(price.replace("₹", "").replace(",", "").strip())
+
+                # Filter realistic gold price range
+                if 50000 < value < 100000:
+                    return f"₹ {value}"
 
     except Exception as e:
         print("Error:", e)
