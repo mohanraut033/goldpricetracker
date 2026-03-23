@@ -2,7 +2,7 @@ name: Gold Tracker
 
 on:
   schedule:
-    - cron: "0 */2 * * *"   # every 2 hours
+    - cron: "0 */2 * * *"
   workflow_dispatch:
 
 jobs:
@@ -23,6 +23,6 @@ jobs:
 
       - name: Run script
         env:
-          BOT_TOKEN: ${{ secrets.8754524312:AAHesqteNjbAcnxsHpr8J9LAdRlGTc1pW4M }}
-          CHAT_ID: ${{ secrets.1091940427 }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
         run: python gold_price_tracker.py
