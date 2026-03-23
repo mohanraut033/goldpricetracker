@@ -20,6 +20,8 @@ def get_gold_price():
             # Extract price using locator
             price = page.locator('//span[@id="22K-price"]').inner_text()
 
+            print("Extracted Price:", price)
+
             browser.close()
 
             return price.strip()
