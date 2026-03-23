@@ -1,32 +1,36 @@
-import requests
-from bs4 import BeautifulSoup
 import os
+import requests
+from playwright.sync_api import sync_playwright
 
 
 # ================= FETCH GOLD PRICE =================
 def get_gold_price():
-    import requests
-    from bs4 import BeautifulSoup
-
     try:
-        url = "https://www.bankbazaar.com/gold-rate.html"
-        headers = {"User-Agent": "Mozilla/5.0"}
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
 
-        response = requests.get(url, headers=headers, timeout=10)
-        soup = BeautifulSoup(response.text, "html.parser")
+            page.goto("https://www.goodreturns.in/gold-rates/", timeout=60000)
 
-        # Find table values
-        rows = soup.find_all("td")
+            # Wait for page to load
+            page.wait_for_timeout(5000)
 
-        for row in rows:
-            text = row.get_text(strip=True)
-            if "₹" in text and len(text) < 15:
-                return text
+            content = page.content()
+
+            # Extract price using simple logic
+            import re
+            match = re.search(r"₹\s?\d{4,6}", content)
+
+            browser.close()
+
+            if match:
+                return match.group()
 
     except Exception as e:
         print("Error:", e)
 
     return "Not Found"
+
 
 # ================= TELEGRAM ALERT =================
 def send_telegram(message):
@@ -47,17 +51,12 @@ if __name__ == "__main__":
     print("Gold Price:", price)
 
     if price == "Not Found":
-        send_telegram("⚠️ Failed to fetch gold price. Scraper issue.")
+        send_telegram("⚠️ Failed to fetch gold price (Playwright).")
     else:
-        if has_price_changed(price):
-            message = f"""
+        message = f"""
 💰 Gold Price Alert (India)
 
 📊 Current Price: {price}
-⏰ Auto-checked via GitHub Actions
-
-#GoldTracker #Automation
+🤖 Source: Playwright Automation
 """
-            send_telegram(message)
-        else:
-            print("No price change. No alert sent.")
+        send_telegram(message)
