@@ -5,51 +5,31 @@ import os
 
 # ================= FETCH GOLD PRICE =================
 def get_gold_price():
+    import requests
+    from bs4 import BeautifulSoup
+
     headers = {"User-Agent": "Mozilla/5.0"}
 
-    urls = [
-        "https://www.goodreturns.in/gold-rates/",
-        "https://www.livechennai.com/gold_silverrate.asp"
-    ]
+    try:
+        url = "https://www.goodreturns.in/gold-rates/"
+        response = requests.get(url, headers=headers, timeout=10)
 
-    for url in urls:
-        try:
-            response = requests.get(url, headers=headers, timeout=10)
-            soup = BeautifulSoup(response.text, "html.parser")
+        soup = BeautifulSoup(response.text, "html.parser")
 
-            selectors = [
-                ("span", {"class": "gr-rt"}),
-                ("td", {"class": "goldRate"})
-            ]
+        # Get all text and search manually
+        text = soup.get_text()
 
-            for tag, attrs in selectors:
-                result = soup.find(tag, attrs)
-                if result:
-                    return result.text.strip()
+        # Find price using keyword
+        import re
+        match = re.search(r"₹\s?\d{4,6}", text)
 
-        except Exception as e:
-            print(f"Error with {url}: {e}")
+        if match:
+            return match.group()
+
+    except Exception as e:
+        print("Error:", e)
 
     return "Not Found"
-
-
-# ================= PRICE CHANGE CHECK =================
-def has_price_changed(new_price):
-    file_path = "last_price.txt"
-
-    if os.path.exists(file_path):
-        with open(file_path, "r") as f:
-            old_price = f.read().strip()
-    else:
-        old_price = ""
-
-    if new_price != old_price:
-        with open(file_path, "w") as f:
-            f.write(new_price)
-        return True
-
-    return False
-
 
 # ================= TELEGRAM ALERT =================
 def send_telegram(message):
