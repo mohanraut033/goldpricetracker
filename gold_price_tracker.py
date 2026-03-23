@@ -3,6 +3,22 @@ import requests
 from playwright.sync_api import sync_playwright
 
 
+def get_all_chat_ids():
+    BOT_TOKEN = os.getenv("BOT_TOKEN")
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
+
+    response = requests.get(url).json()
+
+    chat_ids = set()
+
+    for item in response.get("result", []):
+        if "message" in item:
+            chat_ids.add(item["message"]["chat"]["id"])
+
+    return list(chat_ids)
+
+
+
 # ================= FETCH GOLD PRICE =================
 def get_gold_price():
     try:
@@ -34,14 +50,15 @@ def get_gold_price():
 # ================= TELEGRAM ALERT =================
 def send_telegram(message):
     BOT_TOKEN = os.getenv("BOT_TOKEN")
-    CHAT_ID = os.getenv("CHAT_ID")
+    chat_ids = get_all_chat_ids()
 
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    for chat_id in chat_ids:
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
-    requests.get(url, params={
-        "chat_id": CHAT_ID,
-        "text": message
-    })
+        requests.get(url, params={
+            "chat_id": chat_id,
+            "text": message
+        })
 
 
 # ================= MAIN =================
