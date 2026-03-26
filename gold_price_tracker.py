@@ -59,6 +59,8 @@ def send_telegram(message):
             "chat_id": chat_id,
             "text": message
         })
+        print("Sending message to Telegram...")
+    print("Sending message to Telegram...")
 
 
 # ================= MAIN =================
