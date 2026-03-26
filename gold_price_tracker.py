@@ -49,18 +49,19 @@ def get_gold_price():
 
 # ================= TELEGRAM ALERT =================
 def send_telegram(message):
+    print("Sending message to Telegram...")  # 👈 ADD HERE
+
     BOT_TOKEN = os.getenv("BOT_TOKEN")
-    chat_ids = get_all_chat_ids()
+    CHAT_ID = os.getenv("CHAT_ID")
 
-    for chat_id in chat_ids:
-        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
-        requests.get(url, params={
-            "chat_id": chat_id,
-            "text": message
-        })
-        print("Sending message to Telegram...")
-    print("Sending message to Telegram...")
+    response = requests.get(url, params={
+        "chat_id": CHAT_ID,
+        "text": message
+    })
+
+    print("Telegram Response:", response.text)  # 👈 ALSO ADD THIS
 
 
 # ================= MAIN =================
@@ -77,4 +78,5 @@ if __name__ == "__main__":
 📊 Current Price: {price}
 🤖 Source: Playwright Automation
 """
+        print("About to send message...")
         send_telegram(message)
