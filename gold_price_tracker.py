@@ -28,9 +28,8 @@ def get_gold_price():
 
             page.goto("https://www.goodreturns.in/gold-rates/", timeout=60000)
 
-            page.wait_for_selector('#22K-price', timeout=10000)
-
-            price = page.locator('#22K-price').inner_text()
+            page.wait_for_selector('xpath=//span[@id="22K-price"]', timeout=10000)
+            price = page.locator('xpath=//span[@id="22K-price"]').inner_text()
 
             print("Extracted Price:", price)
 
